@@ -11,7 +11,7 @@ def main():
         os.path.join(os.path.dirname(__file__), 'LOG'), "MAIN")
     app = QApplication(sys.argv)
     model = MainModel(app_folder=os.path.dirname(__file__),
-                      developing=True)
+                      developing=False)
     MainController(model)
     sys.exit(app.exec())
 
