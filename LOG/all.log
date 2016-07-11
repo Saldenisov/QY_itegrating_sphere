@@ -1,0 +1,5 @@
+2016-07-10 19:39:33,555 - MAIN.controllers.maincontroller - INFO - Loading file:C:/Users/saldenisov/Dropbox/Python/QY_itegrating_sphere/test-excel.xlsx
+2016-07-10 19:39:33,663 - MAIN.models.QYmodel - INFO - Data file successfully opened
+2016-07-10 19:39:37,429 - MAIN.models.QYmodel - INFO - QY calculation started:
+2016-07-10 19:39:37,430 - MAIN.models.QYmodel - INFO - QY calculation finished successfully
+2016-07-10 19:39:44,252 - MAIN.controllers.maincontroller - INFO - Closing
