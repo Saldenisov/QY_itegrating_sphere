@@ -61,6 +61,7 @@ class QYModel:
         Files extentions: xlx, xlsx
         """
         try:
+            a = pd.DataFrame()
             data = pd.read_excel(file)
             self.logger.info('Data file successfully opened')
         except (MyException, XLRDError) as e:
