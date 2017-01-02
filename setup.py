@@ -36,7 +36,7 @@ setup(
     ],
     keywords='physical-chemistry calculations emission quantuum yield',
 
-    packages=[]#find_packages(),
+    packages=[],#find_packages(),
     # exclude=['contrib', 'docs', 'tests']
 
     # List run-time dependencies here.  These will be installed by pip when
