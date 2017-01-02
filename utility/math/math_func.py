@@ -78,4 +78,3 @@ def background_correct(var_Y):
     varY = np.array(var_Y)
     varY = varY - np.min(varY)
     return varY
-    

@@ -3,27 +3,23 @@ Created on 17 juin 2016
 
 @author: saldenisov
 '''
-'''
-Created on 7 juin 2016
-
-@author: saldenisov
-'''
-
-import matplotlib
-matplotlib.use('Qt5Agg')
-import matplotlib.pyplot as plt
 
 import os
-from utility import Configuration, remove_nan, MyException, IsnanInput
-from xlrd import XLRDError
-
+import sqlite3
+import json
 import pandas as pd
 import numpy as np
 import clipboard
-from scipy import integrate, isnan
+import logging
+
+from utility import remove_nan, MyException, IsnanInput
+from xlrd import XLRDError
+from scipy import integrate
 from utility import array_correct_template as a_c_t
 from utility import background_correct as b_c
-import logging
+import matplotlib
+matplotlib.use('Qt5Agg')
+import matplotlib.pyplot as plt
 module_logger = logging.getLogger(__name__)
 
 class QYModel:
@@ -58,10 +54,9 @@ class QYModel:
         """
         Data is being set from file
 
-        Files extentions: xlx, xlsx
+        Files extensions: xlx, xlsx
         """
         try:
-            a = pd.DataFrame()
             data = pd.read_excel(file)
             self.logger.info('Data file successfully opened')
         except (MyException, XLRDError) as e:
@@ -86,16 +81,26 @@ class QYModel:
                 Xc = remove_nan(data['Xc'])
                 Yc = remove_nan(data['Yc'])
             except KeyError as e:
-                self.logger.info('KeyError: no correction data, trying to open from settings')
+                self.logger.info('KeyError: no correction data, trying to open from database')
                 try:
-                    path = os.path.join(self.app_folder, 'settings\\corrections.txt')
-                    data_cor = pd.read_csv(path, sep='\t')
-                    Xc = remove_nan(data_cor['Xc'])
-                    Yc = remove_nan(data_cor['Yc'])
+                    db = sqlite3.connect('mydb.db')
+                    cursor = db.cursor()
+                    cursor.execute('''SELECT Xc, Yc FROM corrections''')
+                    Xc, Yc = cursor.fetchone()
+                    Xc = np.fromstring(Xc, dtype=float, sep='\t')
+                    Yc = np.fromstring(Yc, dtype=float, sep='\t')
                     self.logger.info('Success')
-                except (Exception, KeyError, OSError) as e:
-                    self.logger.info('Error: problems with settings\\corrections.txt')
-                    self.logger.error(str(e))
+                except (sqlite3.Error) as e:
+                    self.logger.info(str(e)+':'+'no correction data, trying to open from settings file')
+                    try:
+                        path = os.path.join(self.app_folder, 'settings\\corrections.txt')
+                        data_cor = pd.read_csv(path, sep='\t')
+                        Xc = remove_nan(data_cor['Xc'])
+                        Yc = remove_nan(data_cor['Yc'])
+                        self.logger.info('Success')
+                    except (Exception, KeyError, OSError) as e:
+                            self.logger.info('Error: problems with settings\\corrections.txt')
+                            self.logger.error(str(e))
 
             """dilute emission array"""
             try:
@@ -123,6 +128,36 @@ class QYModel:
                                 Xe, Ea, Eb, Ec, Ed, Xl, La, Lb, Lc, Xc, Yc""")
             self.logger.error(str(e))
             raise MyException
+
+    def set_correction(self):
+        """
+        Set correction Xc and Yc
+        """
+        try:
+            db = sqlite3.connect('mydb.db')
+            cursor = db.cursor()
+            cursor.execute('''SELECT Xc, Yc FROM corrections''')
+            Xc, Yc = cursor.fetchone()
+            Xc = np.fromstring(Xc, dtype=float, sep='\t')
+            Yc = np.fromstring(Yc, dtype=float, sep='\t')
+            self.logger.info('Success')
+        except (sqlite3.Error) as e:
+            self.logger.info(str(e)+':'+'no correction data, trying to open from settings file')
+            try:
+                path = os.path.join(self.app_folder, 'settings\\corrections.txt')
+                data_cor = pd.read_csv(path, sep='\t')
+                Xc = remove_nan(data_cor['Xc'])
+                Yc = remove_nan(data_cor['Yc'])
+                self.logger.info('Success')
+            except (Exception, KeyError, OSError) as e:
+                self.logger.info('Error: problems with settings\\corrections.txt')
+                self.logger.error(str(e))
+                Xc = np.arange(330, 851)
+                Yc = np.ones(520)
+        finally:
+            self.data = {'Xc': Xc,
+                         'Yc': Yc}
+            self.notify_observers()
 
     def set_data_clipboard(self, column):
         s = clipboard.paste()

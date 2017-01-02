@@ -105,6 +105,9 @@ class MainController():
             tablecontroller = TableController(in_model=modeltable,
                                               mainmodel=self.model,
                                               name=name)
+            tablecontroller.model.set_correction()
+            datastatus = tablecontroller.model.check_datastatus()
+            tablecontroller.model.set_datastatus(datastatus)
             self.model.add_table(table=tablecontroller, name=name)
         except MyException as e:
             self.logger.info('Could not open empty table')

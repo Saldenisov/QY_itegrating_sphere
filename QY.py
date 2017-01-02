@@ -1,5 +1,9 @@
-import sys, os
+"""
+saldenisov@gmail.com
+"""
 
+import sys
+import os
 from PyQt5.QtWidgets import QApplication
 from models import MainModel
 from controllers import MainController
@@ -14,6 +18,7 @@ def main():
                       developing=False)
     MainController(model)
     sys.exit(app.exec())
+
 
 if __name__ == '__main__':
     main()
